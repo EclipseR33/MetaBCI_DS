@@ -234,7 +234,7 @@ async def chat_completions(
             name = db.Column(db.String(80), unique=True, nullable=False)
             info = db.Column(db.String(200), unique=False, nullable=False)
 
-        DATABASE_URI = 'sqlite:////Users/meijiawei/Documents/metabci/emotion_metabci/demos/chat_demos/instance/users.db'
+        DATABASE_URI = 'sqlite://demos/chat_demos/instance/users.db'
 
         # 创建数据库引擎
         engine = create_engine(DATABASE_URI)
