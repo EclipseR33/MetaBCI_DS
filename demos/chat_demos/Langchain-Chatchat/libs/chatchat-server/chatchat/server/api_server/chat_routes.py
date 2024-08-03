@@ -71,7 +71,7 @@ async def chat_completions(
 
     #client = get_OpenAIClient(model_name=body.model, is_async=True)
     #client.chat.completions.create()
-    client = ZhipuAI(api_key="e3ebd37cf2d247fbdc3654c29d0c796b.ESZ67PNR5gbCydt0")  # 填写您自己的APIKey
+    client = ZhipuAI(api_key="APIKey")  # 填写您自己的APIKey
     body.model = "emohaa"
     # body.model = "glm-4"
     # body.stream = False
