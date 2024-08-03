@@ -184,8 +184,11 @@ class Experiment:
             )
         )
         event.clearEvents()
-        event.globalKeys.add(key="escape", func=self.closeEvent)
+        event.globalKeys.add(key="q", func=self.quit)
 
+    def quit(self):
+        self.current_win.close()
+        return
     def closeEvent(self):
         """Close operation after run."""
         logging.warning(
@@ -211,6 +214,18 @@ class Experiment:
         # fixed supplied arguments
         self.paradigms[name] = partial(func, *args, **kwargs)
 
+    def register_paradigm_new(self, name, paradigm):
+        """Create Paradigms, which allows multiple paradigms to be created at the same time.
+
+        Parameters:
+            name: str
+                Paradigm name.
+            func:
+                Paradigm realization function.
+
+        """
+        # fixed supplied arguments
+        self.paradigms[name] = paradigm.forward
     def unregister_paradigm(self, name):
         """Clear the created paradigm with the name "name".
 
@@ -364,11 +379,10 @@ class Experiment:
         try:
             while True:
                 t = trialClock.getTime()
-                keys = event.getKeys(keyList=["q", "up", "down", "return"])
+                keys = event.getKeys(keyList=["up", "down", "return"])
 
                 # exit program
-                if "q" in keys:
-                    break
+
 
                 # select paradigm
                 names = list(self.paradigms.keys())
@@ -396,7 +410,6 @@ class Experiment:
                         fps_textstim.text = "%i fps" % win.fps()
                         lastFPSupdate += 1
                     fps_textstim.draw()
-
                 win.flip()
 
         except Exception as e:

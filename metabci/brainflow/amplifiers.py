@@ -5,6 +5,7 @@ Amplifiers.
 """
 import datetime
 import socket
+
 import struct
 import threading
 import time
@@ -198,6 +199,7 @@ class BaseAmplifier:
         while not self._exit.is_set():
             try:
                 samples = self.recv()
+                logger_amp.info(f"samples shape {len(samples)}")
                 if samples:
                     self._detect_event(samples)
             except Exception:
@@ -222,10 +224,13 @@ class BaseAmplifier:
                 marker.append(sample)
                 if marker(sample[-1]) and worker.is_alive():
                     worker.put(marker.get_epoch())
+                    # worker.run()
+
 
     def up_worker(self, name):
         logger_amp.info("up worker-{}".format(name))
-        self._workers[name].start()
+        while not self._workers[name].is_alive():
+            self._workers[name].start()
 
     def down_worker(self, name):
         logger_amp.info("down worker-{}".format(name))
@@ -749,7 +754,10 @@ class Neuracle(BaseAmplifier):
         self.num_chans = num_chans
         self.tcp_link = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._update_time = 0.04
+        self._epoch_time = 1
+        self._idx_among_epoch = 0
         self.pkg_size = int(self._update_time*4*self.num_chans*self.srate)
+
 
     def set_timeout(self, timeout):
         if self.tcp_link:
@@ -760,7 +768,10 @@ class Neuracle(BaseAmplifier):
         data = None
         # rs, _, _ = select.select([self.tcp_link], [], [], 9)
         try:
+            logger_amp.info("trying to receive data")
             raw_data = self.tcp_link.recv(self.pkg_size)
+            logger_amp.info(f"received data length: {len(raw_data)}")
+            self._idx_among_epoch = (self._idx_among_epoch + 1) % (self._epoch_time//self._update_time)
         except Exception:
             self.tcp_link.close()
             print("Can not receive data from socket")
@@ -769,6 +780,23 @@ class Neuracle(BaseAmplifier):
             data = data.reshape(len(data)//self.num_chans, self.num_chans)
         return data.tolist()
 
+    def _substract_offset(self, unpack_data):
+        unpack_data = np.asarray(unpack_data)
+        zero_channels = np.where(unpack_data == 0)[0]
+        trigger_channel = 0
+        for channel in zero_channels:
+            if np.any((channel+self.num_chans) == zero_channels) and np.any((channel+2*self.num_chans) == zero_channels):
+                trigger_channel = channel
+                break
+
+        if trigger_channel+1 == self.num_chans:
+            unpack_data = unpack_data[trigger_channel+1:]
+        else:
+            unpack_data = unpack_data[trigger_channel+1:-(self.num_chans-trigger_channel-1)]
+        # print(len(unpack_data)%self.num_chans)
+        uni_offset = self.num_chans*(self.srate*self._update_time-1)
+        unpack_data = unpack_data[:int(uni_offset)]
+        return unpack_data
     def _unpack_data(self, raw):
         len_raw = len(raw)
         event, hex_data = [], []
@@ -777,7 +805,7 @@ class Neuracle(BaseAmplifier):
         n_item = int(len(hex_data)/4/self.num_chans)
         format_str = '<' + (str(self.num_chans) + 'f') * n_item
         unpack_data = struct.unpack(format_str, hex_data)
-
+        unpack_data = self._substract_offset(unpack_data)
         return np.asarray(unpack_data), event
 
     def connect_tcp(self):
