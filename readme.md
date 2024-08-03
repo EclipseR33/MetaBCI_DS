@@ -22,11 +22,12 @@
 5. 启动AI模型:
    我们的后台建立在 chatchat 基础上。
    登录后按照图示依次启动AI模型。
+   
 ![第一步](https://github.com/garveyMui/MetaBCI/blob/master/images/image3.png)
 ![第二步](https://github.com/garveyMui/MetaBCI/blob/master/images/image4.png)
 ![第三步](https://github.com/garveyMui/MetaBCI/blob/master/images/image5.png)
 ![第四步](https://github.com/garveyMui/MetaBCI/blob/master/images/image6.png)
 
-6. 情感识别:
+7. 情感识别:
    用户登录后会开启情感接收端口。
    运行 Online_emotion.py 文件进行情感识别。
