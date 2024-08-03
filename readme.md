@@ -14,18 +14,18 @@
 
 3. 配置数据库连接:
    更改这两个文件中的数据库链接为你运行环境的绝对路径。
-![文件1]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image1.png))
-![文件2]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image2.png))
+![文件1](https://github.com/garveyMui/MetaBCI/blob/master/images/image1.png)
+![文件2](https://github.com/garveyMui/MetaBCI/blob/master/images/image2.png)
 4. 启动应用程序:
    打开浏览器并访问 http://127.0.0.1:5000 进行注册与登录。
 
 5. 启动AI模型:
    我们的后台建立在 chatchat 基础上。
    登录后按照图示依次启动AI模型。
-![第一步]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image3.png))
-![第二步]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image4.png))
-![第三步]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image5.png))
-![第四步]([images/icon.png](https://github.com/garveyMui/MetaBCI/blob/master/images/image6.png))
+![第一步](https://github.com/garveyMui/MetaBCI/blob/master/images/image3.png)
+![第二步](https://github.com/garveyMui/MetaBCI/blob/master/images/image4.png)
+![第三步](https://github.com/garveyMui/MetaBCI/blob/master/images/image5.png)
+![第四步](https://github.com/garveyMui/MetaBCI/blob/master/images/image6.png)
 
 6. 情感识别:
    用户登录后会开启情感接收端口。
