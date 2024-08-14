@@ -1,5 +1,6 @@
 import os
 
+import pytorch_lightning
 import pytorch_lightning as pl
 import yaml
 # from DeepPurpose.encoders import *
@@ -10,14 +11,6 @@ from metabci.brainda.algorithms.deep_learning import *
 from metabci.brainda.algorithms.deep_learning.encoders.LaBraM.modeling_finetune import *
 from metabci.brainda.algorithms.deep_learning.utils import load_model_labram
 
-
-# from .convca import *
-# from .deepnet import *
-# from .eegnet import *
-# from .encoders import *
-# from .guney_net import *
-# from .pretraining import *
-# from .shallownet import *
 
 
 class Classifier(nn.Sequential):
@@ -62,15 +55,15 @@ def model_initialize(**config):
 def model_pretrained(**config):
     model = EEG_model(**config)
     if config['encoder'] == "labram":
-        load_model_labram(config['pretrained_path'], model.encoder)
+        load_model_labram(config['pretrained_path'], model.module.encoder)
     else:
         raise AttributeError('This pretrained model getting method has not been implemented yet.')
     return model
 
-
-class EEG_model(pl.LightningModule):
+@SkorchNet
+class EEG_model(pytorch_lightning.LightningModule):
     def __init__(self, **config):
-        super(EEG_model, self).__init__()
+        super().__init__()
         print(config)
         encoder = config['encoder']
         print(encoder)
@@ -78,24 +71,24 @@ class EEG_model(pl.LightningModule):
         if encoder == 'convca':
             self.encoder = ConvCA(n_channels=config['n_channels'],
                                   n_samples=config['n_samples'],
-                                  n_classes=config['n_classes'])
+                                  n_classes=config['n_classes']).module
         elif encoder == 'deepnet':
             self.encoder = Deep4Net(n_channels=config['n_channels'],
                                     n_samples=config['n_samples'],
-                                    n_classes=config['n_classes'])
+                                    n_classes=config['n_classes']).module
         elif encoder == 'eegnet':
             self.encoder = EEGNet(n_channels=config['n_channels'],
                                   n_samples=config['n_samples'],
-                                  n_classes=config['n_classes'])
+                                  n_classes=config['n_classes']).module
         elif encoder == "guney_net":
             self.encoder = GuneyNet(n_channels=config['n_channels'],
                                     n_samples=config['n_samples'],
                                     n_classes=config['n_classes'],
-                                    n_bands=config['n_bands'])
+                                    n_bands=config['n_bands']).module
         elif encoder == "shallownet":
             self.encoder = ShallowNet(n_channels=config['n_channels'],
                                       n_samples=config['n_samples'],
-                                      n_classes=config['n_classes'])
+                                      n_classes=config['n_classes']).module
         elif encoder == "transformer":
             self.encoder = transformer(**config)
         elif encoder == "CNN":
@@ -110,6 +103,7 @@ class EEG_model(pl.LightningModule):
             yaml_path = config["yaml_path"]
             with open(yaml_path, 'r') as file:
                 config_from_yaml = yaml.safe_load(file)
+                config_from_yaml['model_config'].update(config)
             self.encoder = create_model(**config_from_yaml['model_config'])
         else:
             raise AttributeError('Please use one of the available encoding method.')
@@ -117,15 +111,6 @@ class EEG_model(pl.LightningModule):
         self.model = Classifier(self.encoder, **config)
 
         self.config = config
-
-        # if 'cuda_id' in self.config:
-        #     if self.config['cuda_id'] is None:
-        #         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        #     else:
-        #         self.device = torch.device(
-        #             'cuda:' + str(self.config['cuda_id']) if torch.cuda.is_available() else 'cpu')
-        # else:
-        #     self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self.result_folder = config.get('result_folder', "./result")
         if not os.path.exists(self.result_folder):
@@ -151,24 +136,40 @@ class EEG_model(pl.LightningModule):
 
 
 if __name__ == '__main__':
+    ### 此文件工作目录请切换到项目根目录 ###
+    # for test eegnet
+    data = np.random.random((1, 32, 200)).astype(np.float64)
+    config = {"encoder":"eegnet",
+              "n_channels":32,
+              "n_samples":200,
+              "n_classes":3}
+    model = model_initialize(**config)
+
+    model.initialize()
+    res = model.predict(data)
+    print(res)
+
+    # for test labram
+    data = np.random.random((1, 30, 1, 200)).astype(np.float64)
     LOAD_PRETRAINED_MODEL = True
     if LOAD_PRETRAINED_MODEL:
         config = {"encoder": "labram",
                   "n_channels": 32,
                   "n_samples": 200,
                   "n_classes": 3,
-                  "pretrained_path": "E:/emotion_metabci/emotion_metabci/checkpoints/LaBraM/labram-base.pth",
-                  "yaml_path": "E:/emotion_metabci/emotion_metabci/metabci/brainda/algorithms/deep_learning/encoders/LaBraM/config.yaml"}
+                  "pretrained_path": "checkpoints/LaBraM/labram-base.pth",
+                  "yaml_path": "checkpoints/config.yaml",
+                  'input_channels': np.arange(31)}
         model = model_pretrained(**config)
     else:
         config = {"encoder": "labram",
                   "n_channels": 32,
                   "n_samples": 200,
                   "n_classes": 3,
-                  "yaml_path": "E:/emotion_metabci/emotion_metabci/metabci/brainda/algorithms/deep_learning/encoders/LaBraM/config.yaml"}
+                  "yaml_path": "checkpoints/config.yaml",
+                  'input_channels': np.arange(31)}
         model = model_initialize(**config)
 
-    data = np.random.random((1, 30, 1, 200))
-    idx_channels = np.arange(31)  # 0 for CLS token
-    res = model((data, idx_channels))
+    model.initialize()
+    res = model.predict(data)
     print(res)

@@ -267,6 +267,7 @@ class NeuralTransformer(nn.Module):
                  use_abs_pos_emb=True, use_rel_pos_bias=False, use_shared_rel_pos_bias=False,
                  use_mean_pooling=True, init_scale=0.001, **kwargs):
         super().__init__()
+        self.input_chans = kwargs.get('input_channels')
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
 
@@ -392,8 +393,7 @@ class NeuralTransformer(nn.Module):
         x: [batch size, number of electrodes, number of patches, patch size]
         For example, for an EEG sample of 4 seconds with 64 electrodes, x will be [batch size, 64, 4, 200]
         '''
-        input_chans = x[1]
-        x = torch.tensor(x[0], dtype=torch.float32)
+        input_chans = self.input_chans if input_chans is None else input_chans
         x = self.forward_features(x, input_chans=input_chans, return_patch_tokens=return_patch_tokens, return_all_tokens=return_all_tokens, **kwargs)
         x = self.head(x)
         return x
