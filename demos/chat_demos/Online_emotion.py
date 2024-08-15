@@ -63,7 +63,7 @@ def labram_model_predict(X, pick_channels, model=None):
     if not type(X) == torch.Tensor:
         X = torch.tensor(X, dtype=torch.float32)
     X = rearrange(X, 'b n (a t) -> b n a t', t=200)
-    logit_prob = model((X, pick_channels))
+    logit_prob = model.predict(X)
     logit_prob = torch.squeeze(logit_prob)
     logit_prob = logit_prob.detach().cpu().numpy()
     print(logit_prob)
@@ -94,14 +94,16 @@ class FeedbackWorker(ProcessWorker):
         #           "n_samples":200*4,
         #           "n_classes":3}
         # self.estimator = model_initialize(**config)
+        idx_chs_labram = get_input_chans(self.pick_chs)  # add CLS token and remap channel names to 10-20 index
         config = {"encoder": "labram",
                   "n_channels": 32,
                   "n_samples": 200,
                   "n_classes": 3,
-                  "pretrained_path": "E:/emotion_metabci/emotion_metabci/checkpoints/LaBraM/labram-base.pth",
-                  "yaml_path": "E:/emotion_metabci/emotion_metabci/metabci/brainda/algorithms/deep_learning/encoders/LaBraM/config.yaml"}
+                  "pretrained_path": "checkpoints/LaBraM/labram-base.pth",
+                  "yaml_path": "checkpoints/config.yaml",
+                  'input_channels': idx_chs_labram}
         self.estimator = model_pretrained(**config)
-        self.ch_idx = np.arange(len(self.pick_chs))
+        self.idx_chs = np.arange(len(self.pick_chs))
         info = StreamInfo(
             name='meta_feedback',
             type='Markers',
@@ -119,11 +121,10 @@ class FeedbackWorker(ProcessWorker):
 
     def consume(self, data, beta=0.6):
         data = np.array(data, dtype=np.float64).T
-        data = data[self.ch_idx]  # drop trigger channel
-        idx_chs = get_input_chans(self.pick_chs)  # add CLS token and remap channel names to 10-20 index
+        data = data[self.idx_chs]  # drop trigger channel
         ##### use eegnet model #####
         # logit_prob = model_predict(data, model=self.estimator)
-        logit_prob = labram_model_predict(data, idx_chs, model=self.estimator)
+        logit_prob = labram_model_predict(data, model=self.estimator)
         if self.labels is None:
             self.labels = logit_prob
         else:
@@ -159,7 +160,7 @@ class FeedbackWorker(ProcessWorker):
 
 
 
-def post():
+def post_test():
     labels = np.random.random((1, 3))
     emotion_dict = {0: "sad", 1: "neutral", 2: "happy"}
     emotion_key = np.argmax(labels, axis=-1)[0]
@@ -183,7 +184,7 @@ def post():
 
 
 if __name__ == '__main__':
-    # post()
+    # post_test()
 
     # 放大器的采样率
     srate = 1000

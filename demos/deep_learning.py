@@ -5,6 +5,7 @@ from sklearn.pipeline import make_pipeline
 
 from metabci.brainda.algorithms.deep_learning import ConvCA, EEGNet
 from metabci.brainda.algorithms.deep_learning.guney_net import GuneyNet
+from metabci.brainda.algorithms.deep_learning.models import model_initialize
 from metabci.brainda.algorithms.utils.model_selection import (
     set_random_seeds,
     generate_kfold_indices, match_kfold_indices)
@@ -54,8 +55,15 @@ indices = generate_kfold_indices(meta, kfold=kfold)
 # X: [batch size, number of channels, number of sample points]
 # T: [batch size, number of channels, number of classes, number of sample points]
 
+# original method
+# estimator = ShallowNet(X.shape[1], X.shape[2], 2)
 
-estimator = ShallowNet(X.shape[1], X.shape[2], 2)
+# our new factory method
+config = {"encoder": "shallownet",
+          "n_channels": X.shape[1],
+          "n_samples": X.shape[2],
+          "n_classes": 2}
+estimator = model_initialize(**config)
 
 accs = []
 for k in range(kfold):

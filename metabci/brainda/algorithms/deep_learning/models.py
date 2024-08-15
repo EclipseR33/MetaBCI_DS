@@ -49,11 +49,13 @@ class Classifier(nn.Sequential):
 
 def model_initialize(**config):
     model = EEG_model(**config)
+    model.initialize()
     return model
 
 
 def model_pretrained(**config):
     model = EEG_model(**config)
+    model.initialize()
     if config['encoder'] == "labram":
         load_model_labram(config['pretrained_path'], model.module.encoder)
     else:
@@ -170,6 +172,5 @@ if __name__ == '__main__':
                   'input_channels': np.arange(31)}
         model = model_initialize(**config)
 
-    model.initialize()
     res = model.predict(data)
     print(res)
