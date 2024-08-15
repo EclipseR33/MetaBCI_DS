@@ -31,7 +31,11 @@ def save_model(model, save_path):
 
 
 def load_model(model, save_path):
-    model.load_state_dict(torch.load(save_path))
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    weights = torch.load(save_path, map_location=device)
+    if 'model' in weights:
+        weights = weights['model']
+    model.load_state_dict(weights, strict=False)
     return model
 
 

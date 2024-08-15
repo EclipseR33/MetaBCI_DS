@@ -7,6 +7,7 @@ import yaml
 # import DeepPurpose.DTI as models
 from timm import create_model
 
+from torch import Tensor
 from metabci.brainda.algorithms.deep_learning import *
 from metabci.brainda.algorithms.deep_learning.encoders.LaBraM.modeling_finetune import *
 from metabci.brainda.algorithms.deep_learning.utils import load_model_labram
@@ -31,14 +32,15 @@ class Classifier(nn.Sequential):
 
     def forward(self, v, **params):
         v = self.model(v)
-
+        v = self.head_forward(v)
+        return v
+    def head_forward(self, v, **params):
         for i, l in enumerate(self.predictor):
             if i == (len(self.predictor) - 1):
                 v = l(v)
                 v = F.gelu(v)
             else:
                 v = F.gelu(self.dropout(l(v)))  # you can add softmax here
-
         return v
 
     def predict(self, v):
@@ -106,6 +108,8 @@ class EEG_model(pytorch_lightning.LightningModule):
             with open(yaml_path, 'r') as file:
                 config_from_yaml = yaml.safe_load(file)
                 config_from_yaml['model_config'].update(config)
+                if "num_classes" in config_from_yaml['model_config']:
+                    config_from_yaml['model_config']['num_classes'] = config['n_classes']
             self.encoder = create_model(**config_from_yaml['model_config'])
         else:
             raise AttributeError('Please use one of the available encoding method.')
@@ -136,6 +140,15 @@ class EEG_model(pytorch_lightning.LightningModule):
         x = self.model(x, **params)
         return x
 
+    def cal_backbone(self, X: Tensor, **kwargs):
+        existing_encoders = ['convca', 'deepnet', 'eegnet', 'guney_net', 'shallownet']
+        if self.encoder_name in existing_encoders:
+            tmp = self.encoder.cal_backbone(X, **kwargs)
+            tmp = self.model.head_forward(tmp, **kwargs)
+            return tmp
+        else:
+            tmp = self.model(X)
+            return tmp
 
 if __name__ == '__main__':
     ### 此文件工作目录请切换到项目根目录 ###
