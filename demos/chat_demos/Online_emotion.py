@@ -50,7 +50,7 @@ def model_predict(X, model=None):
     return logit_prob
 
 # for labram
-def labram_model_predict(X, pick_channels, model=None):
+def labram_model_predict(X, model=None):
     X = np.reshape(X, (-1, X.shape[-2], X.shape[-1]))
     # 降采样
     X = resample(X, down=5)
@@ -61,11 +61,11 @@ def labram_model_predict(X, pick_channels, model=None):
     X = X / np.std(X, axis=(-1, -2), keepdims=True)
     # predict()预测标签
     if not type(X) == torch.Tensor:
-        X = torch.tensor(X, dtype=torch.float32)
+        X = torch.tensor(X, dtype=torch.float64)
     X = rearrange(X, 'b n (a t) -> b n a t', t=200)
     logit_prob = model.predict(X)
-    logit_prob = torch.squeeze(logit_prob)
-    logit_prob = logit_prob.detach().cpu().numpy()
+    # logit_prob = torch.squeeze(logit_prob)
+    # logit_prob = logit_prob.detach().cpu().numpy()
     print(logit_prob)
     return logit_prob
 
@@ -143,7 +143,7 @@ class FeedbackWorker(ProcessWorker):
         emotion = emotion_dict[emotion_key]
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # server_address = ('127.0.0.1', 4023)
-        server_address = ('192.168.31.10', 4023)
+        server_address = ('192.168.137.9', 4023)
         messages = emotion
         try:
             while True:
@@ -154,6 +154,8 @@ class FeedbackWorker(ProcessWorker):
                 if response.decode() == "got it":
                     print("Send successfully")
                     break
+        except Exception as e:
+            print(e)
         finally:
             print('Closing socket')
             sock.close()
@@ -226,11 +228,16 @@ if __name__ == '__main__':
     # 等待 0.5s
     time.sleep(0.5)
 
+
     # nc开始截取数据线程，并把数据传递数据给处理进程
     nc.start_trans()
 
     # 任意键关闭处理进程
-    input('press any key to close\n')
+
+    #input('press any key to close\n')
+    while True:
+        time.sleep(0.5)
+        worker.post()
     # 关闭处理进程
     nc.down_worker('feedback_worker')
     # 等待 1s
