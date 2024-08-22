@@ -119,7 +119,7 @@ class FeedbackWorker(ProcessWorker):
         print('Connected')
         sys.stdout.flush()
 
-    def consume(self, data, beta=0.6):
+    def consume(self, data, beta=0.1):
         data = np.array(data, dtype=np.float64).T
         data = data[self.idx_chs]  # drop trigger channel
         ##### use eegnet model #####
@@ -138,7 +138,8 @@ class FeedbackWorker(ProcessWorker):
             self.outlet.push_sample(p_labels)
 
     def post(self):
-        emotion_dict = {0: "sad", 1: "neutral", 2: "happy"}
+        # emotion_dict = {0: "nervous", 1: "neutral", 2: "happy"}
+        emotion_dict = {0: "neutral", 1: "nervous", 2: "happy"}
         emotion_key = np.argmax(self.labels)
         emotion = emotion_dict[emotion_key]
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

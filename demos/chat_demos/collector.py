@@ -12,7 +12,8 @@ def collecting_all_info(user_name, user_info):
     Online_emotion_server = socket(AF_INET, SOCK_DGRAM)
     # chatchat_server = socket(AF_INET, SOCK_DGRAM)
 
-    Online_emotion_server.bind(('192.168.31.10', udp_port_Online_emotion))
+    # Online_emotion_server.bind(('192.168.31.10', udp_port_Online_emotion))
+    Online_emotion_server.bind(('172.20.10.3', udp_port_Online_emotion))
     # chatchat_server.bind(('127.0.0.1', tcp_port_chatchat))
     # chatchat_server.listen(5)
 
@@ -25,18 +26,18 @@ def collecting_all_info(user_name, user_info):
     emotion = emotion.decode()
     print(emotion)
     if emotion == "happy":
-        emotion_prop = ",今天心情不错~"
-    elif emotion == "sad":
-        emotion_prop = ",今天心情很沮丧..."
+        emotion_prop = ",现在心情不错~"
+    elif emotion == "nervous":
+        emotion_prop = ",现在有点紧张..."
     else:
-        emotion_prop = ",今天心情很平静."
+        emotion_prop = ",现在心情还算平静."
     db = SQLAlchemy()
     class Current(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         name = db.Column(db.String(80), unique=True, nullable=False)
         info = db.Column(db.String(200), unique=False, nullable=False)
 
-    DATABASE_URI = 'sqlite://demos/chat_demos/instance/users.db'
+    DATABASE_URI = 'sqlite://///Users/meijiawei/Documents/metabci/MetaBCI/demos/chat_demos/users.db'
 
     # 创建数据库引擎
     engine = create_engine(DATABASE_URI)
@@ -50,7 +51,6 @@ def collecting_all_info(user_name, user_info):
     first_row = session.query(Current).first()
 
     if first_row:
-        # 修改第一行的电子邮件字段
         first_row.info = first_row.info + emotion_prop
         print(first_row.info)
         # 提交数据库会话
