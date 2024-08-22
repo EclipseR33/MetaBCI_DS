@@ -95,11 +95,18 @@ class FeedbackWorker(ProcessWorker):
         #           "n_classes":3}
         # self.estimator = model_initialize(**config)
         idx_chs_labram = get_input_chans(self.pick_chs)  # add CLS token and remap channel names to 10-20 index
+        # config = {"encoder": "labram",
+        #           "n_channels": 32,
+        #           "n_samples": 200,
+        #           "n_classes": 3,
+        #           "pretrained_path": "checkpoints/LaBraM/labram-base.pth",
+        #           "yaml_path": "checkpoints/config.yaml",
+        #           'input_channels': idx_chs_labram}
         config = {"encoder": "labram",
                   "n_channels": 32,
                   "n_samples": 200,
                   "n_classes": 3,
-                  "pretrained_path": "checkpoints/LaBraM/labram-base.pth",
+                  "pretrained_path": "checkpoints/LaBraM/finetuned/checkpoint-best.pth",
                   "yaml_path": "checkpoints/config.yaml",
                   'input_channels': idx_chs_labram}
         self.estimator = model_pretrained(**config)
