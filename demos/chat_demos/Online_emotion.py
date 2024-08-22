@@ -236,7 +236,6 @@ if __name__ == '__main__':
     # 等待 0.5s
     time.sleep(0.5)
 
-
     # nc开始截取数据线程，并把数据传递数据给处理进程
     nc.start_trans()
 
@@ -244,8 +243,8 @@ if __name__ == '__main__':
 
     #input('press any key to close\n')
     while True:
-        time.sleep(0.5)
         worker.post()
+        time.sleep(120)
     # 关闭处理进程
     nc.down_worker('feedback_worker')
     # 等待 1s
