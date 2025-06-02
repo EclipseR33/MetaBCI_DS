@@ -2,7 +2,7 @@
 
 
 # 默认选用的 LLM 名称
-DEFAULT_LLM_MODEL: emohaa
+DEFAULT_LLM_MODEL: deepseek-ai/DeepSeek-V3
 
 # 默认选用的 Embedding 名称
 DEFAULT_EMBEDDING_MODEL: bge-m3
@@ -68,17 +68,17 @@ LLM_MODEL_CONFIG:
 
 
 # # 平台名称
-# platform_name: xinference
+platform_name: xinference
 
 # # 平台类型
 # # 可选值：['xinference', 'ollama', 'oneapi', 'fastchat', 'openai', 'custom openai']
-# platform_type: xinference
+platform_type: xinference
 
 # # openai api url
 # api_base_url: http://127.0.0.1:9997/v1
 
 # # api key if available
-# api_key: EMPTY
+api_key: sk-7eba8c5db5f246aa959cdd864c843801
 
 # # API 代理
 # api_proxy: ''

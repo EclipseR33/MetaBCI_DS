@@ -14,15 +14,15 @@ HTTPX_DEFAULT_TIMEOUT: 300.0
 
 # 知识库默认存储路径
 KB_ROOT_PATH: 
-  /Users/meijiawei/Documents/metabci/emotion_metabci/demos/chat_demos/Langchain-Chatchat/libs/chatchat-server/data/knowledge_base
+  C:\Users\86722\PycharmProjects\Friday\Project\MetaBCI\MetaBCI-DS\demos\chat_demos\Langchain-Chatchat\libs\chatchat-server\data\knowledge_base
 
 # 数据库默认存储路径。如果使用sqlite，可以直接修改DB_ROOT_PATH；如果使用其它数据库，请直接修改SQLALCHEMY_DATABASE_URI。
 DB_ROOT_PATH: 
-  /Users/meijiawei/Documents/metabci/emotion_metabci/demos/chat_demos/Langchain-Chatchat/libs/chatchat-server/data/knowledge_base/info.db
+  C:\Users\86722\PycharmProjects\Friday\Project\MetaBCI\MetaBCI-DS\demos\chat_demos\Langchain-Chatchat\libs\chatchat-server\data\knowledge_base\info.db
 
 # 知识库信息数据库连接URI
 SQLALCHEMY_DATABASE_URI: 
-  sqlite:////Users/meijiawei/Documents/metabci/emotion_metabci/demos/chat_demos/Langchain-Chatchat/libs/chatchat-server/data/knowledge_base/info.db
+  sqlite:///C:\Users\86722\PycharmProjects\Friday\Project\MetaBCI\MetaBCI-DS\demos\chat_demos\Langchain-Chatchat\libs\chatchat-server\data\knowledge_base\info.db
 
 # API 是否开启跨域
 OPEN_CROSS_DOMAIN: false
